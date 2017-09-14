@@ -1,0 +1,15 @@
+{{#shapes}}
+{{#first}}
+/* do not this edit directly. Rather edit sprite.css in templates and run gulp taks... */
+
+.icon{
+	background-image: url("/assets/images/sprites/{{{sprite}}}");
+}
+
+{{/first}}
+.icon--{{base}} {
+	width: {{width.outer}}px;
+	height: {{height.outer}}px;
+	background-position: {{position.relative.xy}};
+}
+{{/shapes}}
