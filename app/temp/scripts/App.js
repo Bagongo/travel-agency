@@ -42,7 +42,7 @@
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -54,14 +54,19 @@
 
 	var _RevealOnScroll2 = _interopRequireDefault(_RevealOnScroll);
 
+	var _jquery = __webpack_require__(2);
+
+	var _jquery2 = _interopRequireDefault(_jquery);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	var mobileMenu = new _MobileMenu2.default();
-	var revealOnScroll = new _RevealOnScroll2.default();
+	new _RevealOnScroll2.default((0, _jquery2.default)(".feature-item"), "85%");
+	new _RevealOnScroll2.default((0, _jquery2.default)(".testimonial"), "60%");
 
-/***/ },
+/***/ }),
 /* 1 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
 
@@ -108,9 +113,9 @@
 
 	exports.default = MobileMenu;
 
-/***/ },
+/***/ }),
 /* 2 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 	 * jQuery JavaScript Library v2.2.4
@@ -9928,9 +9933,9 @@
 	}));
 
 
-/***/ },
+/***/ }),
 /* 3 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -9953,10 +9958,11 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var RevealOnScroll = function () {
-	  function RevealOnScroll() {
+	  function RevealOnScroll(els, offset) {
 	    _classCallCheck(this, RevealOnScroll);
 
-	    this.itemsToReveal = (0, _jquery2.default)(".feature-item");
+	    this.itemsToReveal = els;
+	    this.offsetPercentage = offset;
 	    this.hideInitially();
 	    this.createWaypoints();
 	  }
@@ -9969,6 +9975,8 @@
 	  }, {
 	    key: 'createWaypoints',
 	    value: function createWaypoints() {
+	      var that = this;
+
 	      this.itemsToReveal.each(function () {
 	        var currentItem = this;
 	        new Waypoint({
@@ -9976,7 +9984,7 @@
 	          handler: function handler() {
 	            (0, _jquery2.default)(currentItem).addClass("reveal-item--is-visible");
 	          },
-	          offset: "85%"
+	          offset: that.offsetPercentage
 	        });
 	      });
 	    }
@@ -9987,15 +9995,15 @@
 
 	exports.default = RevealOnScroll;
 
-/***/ },
+/***/ }),
 /* 4 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	/*!
-	Waypoints - 4.0.0
-	Copyright © 2011-2015 Caleb Troughton
+	Waypoints - 4.0.1
+	Copyright © 2011-2016 Caleb Troughton
 	Licensed under the MIT license.
-	https://github.com/imakewebthings/waypoints/blog/master/licenses.txt
+	https://github.com/imakewebthings/waypoints/blob/master/licenses.txt
 	*/
 	(function() {
 	  'use strict'
@@ -10114,7 +10122,11 @@
 	  /* Public */
 	  /* http://imakewebthings.com/waypoints/api/enable-all */
 	  Waypoint.enableAll = function() {
-	    Waypoint.invokeAll('enable')
+	    Waypoint.Context.refreshAll()
+	    for (var waypointKey in allWaypoints) {
+	      allWaypoints[waypointKey].enabled = true
+	    }
+	    return this
 	  }
 
 	  /* Public */
@@ -10189,6 +10201,10 @@
 	    element.waypointContextKey = this.key
 	    contexts[element.waypointContextKey] = this
 	    keyCounter += 1
+	    if (!Waypoint.windowContext) {
+	      Waypoint.windowContext = true
+	      Waypoint.windowContext = new Context(window)
+	    }
 
 	    this.createThrottledScrollHandler()
 	    this.createThrottledResizeHandler()
@@ -10205,7 +10221,8 @@
 	  Context.prototype.checkEmpty = function() {
 	    var horizontalEmpty = this.Adapter.isEmptyObject(this.waypoints.horizontal)
 	    var verticalEmpty = this.Adapter.isEmptyObject(this.waypoints.vertical)
-	    if (horizontalEmpty && verticalEmpty) {
+	    var isWindow = this.element == this.element.window
+	    if (horizontalEmpty && verticalEmpty && !isWindow) {
 	      this.adapter.off('.waypoints')
 	      delete contexts[this.key]
 	    }
@@ -10274,6 +10291,9 @@
 
 	      for (var waypointKey in this.waypoints[axisKey]) {
 	        var waypoint = this.waypoints[axisKey][waypointKey]
+	        if (waypoint.triggerPoint === null) {
+	          continue
+	        }
 	        var wasBeforeTriggerPoint = axis.oldScroll < waypoint.triggerPoint
 	        var nowAfterTriggerPoint = axis.newScroll >= waypoint.triggerPoint
 	        var crossedForward = wasBeforeTriggerPoint && nowAfterTriggerPoint
@@ -10393,7 +10413,7 @@
 	        }
 
 	        contextModifier = axis.contextScroll - axis.contextOffset
-	        waypoint.triggerPoint = elementOffset + contextModifier - adjustment
+	        waypoint.triggerPoint = Math.floor(elementOffset + contextModifier - adjustment)
 	        wasBeforeScroll = oldTriggerPoint < axis.oldScroll
 	        nowAfterScroll = waypoint.triggerPoint >= axis.oldScroll
 	        triggeredBackward = wasBeforeScroll && nowAfterScroll
@@ -10447,6 +10467,7 @@
 	    }
 	    Context.refreshAll()
 	  }
+
 
 	  Waypoint.requestAnimationFrame = function(callback) {
 	    var requestFn = window.requestAnimationFrame ||
@@ -10737,5 +10758,5 @@
 	}())
 	;
 
-/***/ }
+/***/ })
 /******/ ]);
